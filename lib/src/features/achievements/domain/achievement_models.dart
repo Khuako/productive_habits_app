@@ -40,11 +40,18 @@ class Achievement extends Equatable {
 
   bool get isUnlocked => unlockedAt != null;
 
+  int get displayProgress {
+    if (threshold <= 0) {
+      return 0;
+    }
+    return progress.clamp(0, threshold);
+  }
+
   double get progressFraction {
     if (threshold == 0) {
       return 0;
     }
-    return (progress / threshold).clamp(0, 1).toDouble();
+    return (displayProgress / threshold).toDouble();
   }
 
   @override

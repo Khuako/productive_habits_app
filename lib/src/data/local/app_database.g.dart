@@ -3151,6 +3151,32 @@ class $RecoveryDayEntriesTable extends RecoveryDayEntries
         requiredDuringInsert: false,
         defaultValue: const Constant(''),
       );
+  static const VerificationMeta _lightPlanAcceptedMeta = const VerificationMeta(
+    'lightPlanAccepted',
+  );
+  @override
+  late final GeneratedColumn<bool> lightPlanAccepted = GeneratedColumn<bool>(
+    'light_plan_accepted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("light_plan_accepted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _lightPlanAcceptedAtMeta =
+      const VerificationMeta('lightPlanAcceptedAt');
+  @override
+  late final GeneratedColumn<DateTime> lightPlanAcceptedAt =
+      GeneratedColumn<DateTime>(
+        'light_plan_accepted_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3169,6 +3195,8 @@ class $RecoveryDayEntriesTable extends RecoveryDayEntries
     riskScore,
     reasons,
     suggestedHabitIds,
+    lightPlanAccepted,
+    lightPlanAcceptedAt,
     createdAt,
   ];
   @override
@@ -3220,6 +3248,24 @@ class $RecoveryDayEntriesTable extends RecoveryDayEntries
         ),
       );
     }
+    if (data.containsKey('light_plan_accepted')) {
+      context.handle(
+        _lightPlanAcceptedMeta,
+        lightPlanAccepted.isAcceptableOrUnknown(
+          data['light_plan_accepted']!,
+          _lightPlanAcceptedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('light_plan_accepted_at')) {
+      context.handle(
+        _lightPlanAcceptedAtMeta,
+        lightPlanAcceptedAt.isAcceptableOrUnknown(
+          data['light_plan_accepted_at']!,
+          _lightPlanAcceptedAtMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3257,6 +3303,14 @@ class $RecoveryDayEntriesTable extends RecoveryDayEntries
         DriftSqlType.string,
         data['${effectivePrefix}suggested_habit_ids'],
       )!,
+      lightPlanAccepted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}light_plan_accepted'],
+      )!,
+      lightPlanAcceptedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}light_plan_accepted_at'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3277,6 +3331,8 @@ class RecoveryDayEntry extends DataClass
   final int riskScore;
   final String reasons;
   final String suggestedHabitIds;
+  final bool lightPlanAccepted;
+  final DateTime? lightPlanAcceptedAt;
   final DateTime createdAt;
   const RecoveryDayEntry({
     required this.dayKey,
@@ -3284,6 +3340,8 @@ class RecoveryDayEntry extends DataClass
     required this.riskScore,
     required this.reasons,
     required this.suggestedHabitIds,
+    required this.lightPlanAccepted,
+    this.lightPlanAcceptedAt,
     required this.createdAt,
   });
   @override
@@ -3294,6 +3352,10 @@ class RecoveryDayEntry extends DataClass
     map['risk_score'] = Variable<int>(riskScore);
     map['reasons'] = Variable<String>(reasons);
     map['suggested_habit_ids'] = Variable<String>(suggestedHabitIds);
+    map['light_plan_accepted'] = Variable<bool>(lightPlanAccepted);
+    if (!nullToAbsent || lightPlanAcceptedAt != null) {
+      map['light_plan_accepted_at'] = Variable<DateTime>(lightPlanAcceptedAt);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -3305,6 +3367,10 @@ class RecoveryDayEntry extends DataClass
       riskScore: Value(riskScore),
       reasons: Value(reasons),
       suggestedHabitIds: Value(suggestedHabitIds),
+      lightPlanAccepted: Value(lightPlanAccepted),
+      lightPlanAcceptedAt: lightPlanAcceptedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lightPlanAcceptedAt),
       createdAt: Value(createdAt),
     );
   }
@@ -3320,6 +3386,10 @@ class RecoveryDayEntry extends DataClass
       riskScore: serializer.fromJson<int>(json['riskScore']),
       reasons: serializer.fromJson<String>(json['reasons']),
       suggestedHabitIds: serializer.fromJson<String>(json['suggestedHabitIds']),
+      lightPlanAccepted: serializer.fromJson<bool>(json['lightPlanAccepted']),
+      lightPlanAcceptedAt: serializer.fromJson<DateTime?>(
+        json['lightPlanAcceptedAt'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -3332,6 +3402,8 @@ class RecoveryDayEntry extends DataClass
       'riskScore': serializer.toJson<int>(riskScore),
       'reasons': serializer.toJson<String>(reasons),
       'suggestedHabitIds': serializer.toJson<String>(suggestedHabitIds),
+      'lightPlanAccepted': serializer.toJson<bool>(lightPlanAccepted),
+      'lightPlanAcceptedAt': serializer.toJson<DateTime?>(lightPlanAcceptedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -3342,6 +3414,8 @@ class RecoveryDayEntry extends DataClass
     int? riskScore,
     String? reasons,
     String? suggestedHabitIds,
+    bool? lightPlanAccepted,
+    Value<DateTime?> lightPlanAcceptedAt = const Value.absent(),
     DateTime? createdAt,
   }) => RecoveryDayEntry(
     dayKey: dayKey ?? this.dayKey,
@@ -3349,6 +3423,10 @@ class RecoveryDayEntry extends DataClass
     riskScore: riskScore ?? this.riskScore,
     reasons: reasons ?? this.reasons,
     suggestedHabitIds: suggestedHabitIds ?? this.suggestedHabitIds,
+    lightPlanAccepted: lightPlanAccepted ?? this.lightPlanAccepted,
+    lightPlanAcceptedAt: lightPlanAcceptedAt.present
+        ? lightPlanAcceptedAt.value
+        : this.lightPlanAcceptedAt,
     createdAt: createdAt ?? this.createdAt,
   );
   RecoveryDayEntry copyWithCompanion(RecoveryDayEntriesCompanion data) {
@@ -3360,6 +3438,12 @@ class RecoveryDayEntry extends DataClass
       suggestedHabitIds: data.suggestedHabitIds.present
           ? data.suggestedHabitIds.value
           : this.suggestedHabitIds,
+      lightPlanAccepted: data.lightPlanAccepted.present
+          ? data.lightPlanAccepted.value
+          : this.lightPlanAccepted,
+      lightPlanAcceptedAt: data.lightPlanAcceptedAt.present
+          ? data.lightPlanAcceptedAt.value
+          : this.lightPlanAcceptedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -3372,6 +3456,8 @@ class RecoveryDayEntry extends DataClass
           ..write('riskScore: $riskScore, ')
           ..write('reasons: $reasons, ')
           ..write('suggestedHabitIds: $suggestedHabitIds, ')
+          ..write('lightPlanAccepted: $lightPlanAccepted, ')
+          ..write('lightPlanAcceptedAt: $lightPlanAcceptedAt, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -3384,6 +3470,8 @@ class RecoveryDayEntry extends DataClass
     riskScore,
     reasons,
     suggestedHabitIds,
+    lightPlanAccepted,
+    lightPlanAcceptedAt,
     createdAt,
   );
   @override
@@ -3395,6 +3483,8 @@ class RecoveryDayEntry extends DataClass
           other.riskScore == this.riskScore &&
           other.reasons == this.reasons &&
           other.suggestedHabitIds == this.suggestedHabitIds &&
+          other.lightPlanAccepted == this.lightPlanAccepted &&
+          other.lightPlanAcceptedAt == this.lightPlanAcceptedAt &&
           other.createdAt == this.createdAt);
 }
 
@@ -3404,6 +3494,8 @@ class RecoveryDayEntriesCompanion extends UpdateCompanion<RecoveryDayEntry> {
   final Value<int> riskScore;
   final Value<String> reasons;
   final Value<String> suggestedHabitIds;
+  final Value<bool> lightPlanAccepted;
+  final Value<DateTime?> lightPlanAcceptedAt;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const RecoveryDayEntriesCompanion({
@@ -3412,6 +3504,8 @@ class RecoveryDayEntriesCompanion extends UpdateCompanion<RecoveryDayEntry> {
     this.riskScore = const Value.absent(),
     this.reasons = const Value.absent(),
     this.suggestedHabitIds = const Value.absent(),
+    this.lightPlanAccepted = const Value.absent(),
+    this.lightPlanAcceptedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -3421,6 +3515,8 @@ class RecoveryDayEntriesCompanion extends UpdateCompanion<RecoveryDayEntry> {
     this.riskScore = const Value.absent(),
     this.reasons = const Value.absent(),
     this.suggestedHabitIds = const Value.absent(),
+    this.lightPlanAccepted = const Value.absent(),
+    this.lightPlanAcceptedAt = const Value.absent(),
     required DateTime createdAt,
     this.rowid = const Value.absent(),
   }) : dayKey = Value(dayKey),
@@ -3432,6 +3528,8 @@ class RecoveryDayEntriesCompanion extends UpdateCompanion<RecoveryDayEntry> {
     Expression<int>? riskScore,
     Expression<String>? reasons,
     Expression<String>? suggestedHabitIds,
+    Expression<bool>? lightPlanAccepted,
+    Expression<DateTime>? lightPlanAcceptedAt,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -3441,6 +3539,9 @@ class RecoveryDayEntriesCompanion extends UpdateCompanion<RecoveryDayEntry> {
       if (riskScore != null) 'risk_score': riskScore,
       if (reasons != null) 'reasons': reasons,
       if (suggestedHabitIds != null) 'suggested_habit_ids': suggestedHabitIds,
+      if (lightPlanAccepted != null) 'light_plan_accepted': lightPlanAccepted,
+      if (lightPlanAcceptedAt != null)
+        'light_plan_accepted_at': lightPlanAcceptedAt,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -3452,6 +3553,8 @@ class RecoveryDayEntriesCompanion extends UpdateCompanion<RecoveryDayEntry> {
     Value<int>? riskScore,
     Value<String>? reasons,
     Value<String>? suggestedHabitIds,
+    Value<bool>? lightPlanAccepted,
+    Value<DateTime?>? lightPlanAcceptedAt,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -3461,6 +3564,8 @@ class RecoveryDayEntriesCompanion extends UpdateCompanion<RecoveryDayEntry> {
       riskScore: riskScore ?? this.riskScore,
       reasons: reasons ?? this.reasons,
       suggestedHabitIds: suggestedHabitIds ?? this.suggestedHabitIds,
+      lightPlanAccepted: lightPlanAccepted ?? this.lightPlanAccepted,
+      lightPlanAcceptedAt: lightPlanAcceptedAt ?? this.lightPlanAcceptedAt,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -3484,6 +3589,14 @@ class RecoveryDayEntriesCompanion extends UpdateCompanion<RecoveryDayEntry> {
     if (suggestedHabitIds.present) {
       map['suggested_habit_ids'] = Variable<String>(suggestedHabitIds.value);
     }
+    if (lightPlanAccepted.present) {
+      map['light_plan_accepted'] = Variable<bool>(lightPlanAccepted.value);
+    }
+    if (lightPlanAcceptedAt.present) {
+      map['light_plan_accepted_at'] = Variable<DateTime>(
+        lightPlanAcceptedAt.value,
+      );
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -3501,6 +3614,8 @@ class RecoveryDayEntriesCompanion extends UpdateCompanion<RecoveryDayEntry> {
           ..write('riskScore: $riskScore, ')
           ..write('reasons: $reasons, ')
           ..write('suggestedHabitIds: $suggestedHabitIds, ')
+          ..write('lightPlanAccepted: $lightPlanAccepted, ')
+          ..write('lightPlanAcceptedAt: $lightPlanAcceptedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -5641,6 +5756,8 @@ typedef $$RecoveryDayEntriesTableCreateCompanionBuilder =
       Value<int> riskScore,
       Value<String> reasons,
       Value<String> suggestedHabitIds,
+      Value<bool> lightPlanAccepted,
+      Value<DateTime?> lightPlanAcceptedAt,
       required DateTime createdAt,
       Value<int> rowid,
     });
@@ -5651,6 +5768,8 @@ typedef $$RecoveryDayEntriesTableUpdateCompanionBuilder =
       Value<int> riskScore,
       Value<String> reasons,
       Value<String> suggestedHabitIds,
+      Value<bool> lightPlanAccepted,
+      Value<DateTime?> lightPlanAcceptedAt,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -5686,6 +5805,16 @@ class $$RecoveryDayEntriesTableFilterComposer
 
   ColumnFilters<String> get suggestedHabitIds => $composableBuilder(
     column: $table.suggestedHabitIds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get lightPlanAccepted => $composableBuilder(
+    column: $table.lightPlanAccepted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lightPlanAcceptedAt => $composableBuilder(
+    column: $table.lightPlanAcceptedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5729,6 +5858,16 @@ class $$RecoveryDayEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get lightPlanAccepted => $composableBuilder(
+    column: $table.lightPlanAccepted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lightPlanAcceptedAt => $composableBuilder(
+    column: $table.lightPlanAcceptedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -5758,6 +5897,16 @@ class $$RecoveryDayEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get suggestedHabitIds => $composableBuilder(
     column: $table.suggestedHabitIds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get lightPlanAccepted => $composableBuilder(
+    column: $table.lightPlanAccepted,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lightPlanAcceptedAt => $composableBuilder(
+    column: $table.lightPlanAcceptedAt,
     builder: (column) => column,
   );
 
@@ -5810,6 +5959,8 @@ class $$RecoveryDayEntriesTableTableManager
                 Value<int> riskScore = const Value.absent(),
                 Value<String> reasons = const Value.absent(),
                 Value<String> suggestedHabitIds = const Value.absent(),
+                Value<bool> lightPlanAccepted = const Value.absent(),
+                Value<DateTime?> lightPlanAcceptedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RecoveryDayEntriesCompanion(
@@ -5818,6 +5969,8 @@ class $$RecoveryDayEntriesTableTableManager
                 riskScore: riskScore,
                 reasons: reasons,
                 suggestedHabitIds: suggestedHabitIds,
+                lightPlanAccepted: lightPlanAccepted,
+                lightPlanAcceptedAt: lightPlanAcceptedAt,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -5828,6 +5981,8 @@ class $$RecoveryDayEntriesTableTableManager
                 Value<int> riskScore = const Value.absent(),
                 Value<String> reasons = const Value.absent(),
                 Value<String> suggestedHabitIds = const Value.absent(),
+                Value<bool> lightPlanAccepted = const Value.absent(),
+                Value<DateTime?> lightPlanAcceptedAt = const Value.absent(),
                 required DateTime createdAt,
                 Value<int> rowid = const Value.absent(),
               }) => RecoveryDayEntriesCompanion.insert(
@@ -5836,6 +5991,8 @@ class $$RecoveryDayEntriesTableTableManager
                 riskScore: riskScore,
                 reasons: reasons,
                 suggestedHabitIds: suggestedHabitIds,
+                lightPlanAccepted: lightPlanAccepted,
+                lightPlanAcceptedAt: lightPlanAcceptedAt,
                 createdAt: createdAt,
                 rowid: rowid,
               ),

@@ -98,6 +98,9 @@ class RecoveryDayEntries extends Table {
   IntColumn get riskScore => integer().withDefault(const Constant(0))();
   TextColumn get reasons => text().withDefault(const Constant(''))();
   TextColumn get suggestedHabitIds => text().withDefault(const Constant(''))();
+  BoolColumn get lightPlanAccepted =>
+      boolean().withDefault(const Constant(false))();
+  DateTimeColumn get lightPlanAcceptedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -122,7 +125,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -131,6 +134,16 @@ class AppDatabase extends _$AppDatabase {
             await migrator.addColumn(habits, habits.priority);
             await migrator.createTable(dailyCheckIns);
             await migrator.createTable(recoveryDayEntries);
+          }
+          if (from == 2) {
+            await migrator.addColumn(
+              recoveryDayEntries,
+              recoveryDayEntries.lightPlanAccepted,
+            );
+            await migrator.addColumn(
+              recoveryDayEntries,
+              recoveryDayEntries.lightPlanAcceptedAt,
+            );
           }
         },
       );

@@ -101,6 +101,7 @@ GoRouter createAppRouter(AppScope scope) {
                   create: (context) => StatsCubit(
                     progressRepository: scope.progressRepository,
                     achievementRepository: scope.achievementRepository,
+                    recoveryRepository: scope.recoveryRepository,
                   )..start(),
                   child: const StatsScreen(),
                 ),

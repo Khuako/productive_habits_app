@@ -145,6 +145,14 @@ class DashboardCubit extends Cubit<DashboardState> {
     return _recoveryRepository.submitDailyCheckIn(draft);
   }
 
+  Future<void> acceptLightPlan() {
+    final recoveryState = _recoveryState;
+    if (recoveryState == null) {
+      return Future.value();
+    }
+    return _recoveryRepository.acceptLightPlan(recoveryState.dayKey);
+  }
+
   void _emitState() {
     emit(
       state.copyWith(
@@ -217,6 +225,11 @@ class DashboardScreen extends StatelessWidget {
                   (item) => state.recoveryState!.suggestedHabitIds.contains(item.habit.id),
                 )
                 .toList();
+        final acceptedLightPlan =
+            state.recoveryState?.lightPlanAccepted == true &&
+            state.recoveryState?.isLightPlanAvailable == true;
+        final visibleFocusHabits =
+            acceptedLightPlan ? suggestedFocus : state.todayHabits;
 
         final greeting = state.profile?.name.isNotEmpty == true
             ? 'Привет, ${state.profile!.name}'
@@ -297,6 +310,7 @@ class DashboardScreen extends StatelessWidget {
                 child: _RecoveryStatusCard(
                   recoveryState: state.recoveryState!,
                   suggestedFocus: suggestedFocus,
+                  onAccept: () => context.read<DashboardCubit>().acceptLightPlan(),
                   onRetake: () => _openDailyCheckIn(context),
                 ),
               ),
@@ -355,11 +369,11 @@ class DashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Сегодняшний фокус',
+              acceptedLightPlan ? 'Сегодняшний облегченный фокус' : 'Сегодняшний фокус',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            if (state.todayHabits.isEmpty)
+            if (visibleFocusHabits.isEmpty)
               const EmptyStateCard(
                 title: 'На сегодня все свободно',
                 description:
@@ -367,7 +381,7 @@ class DashboardScreen extends StatelessWidget {
                 icon: Icons.spa_rounded,
               )
             else
-              ...state.todayHabits.map(
+              ...visibleFocusHabits.map(
                 (item) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: _TodayHabitTile(item: item),
@@ -459,11 +473,13 @@ class _RecoveryStatusCard extends StatelessWidget {
   const _RecoveryStatusCard({
     required this.recoveryState,
     required this.suggestedFocus,
+    required this.onAccept,
     required this.onRetake,
   });
 
   final RecoveryDayState recoveryState;
   final List<HabitItem> suggestedFocus;
+  final Future<void> Function() onAccept;
   final Future<void> Function() onRetake;
 
   @override
@@ -544,7 +560,9 @@ class _RecoveryStatusCard extends StatelessWidget {
             if (suggestedFocus.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
-                'Облегченный фокус на сегодня',
+                recoveryState.lightPlanAccepted
+                    ? 'В облегченный фокус вошли'
+                    : 'Предлагаемый облегченный фокус',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 10),
@@ -566,8 +584,34 @@ class _RecoveryStatusCard extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
+                    ),
                 ),
+            ],
+            if (recoveryState.isLightPlanAvailable &&
+                !recoveryState.lightPlanAccepted) ...[
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: onAccept,
+                icon: const Icon(Icons.self_improvement_rounded),
+                label: const Text('Принять облегченный день'),
+              ),
+            ],
+            if (recoveryState.lightPlanAccepted) ...[
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Text(
+                  'Облегченный фокус включен. На главном экране остаются только рекомендованные привычки, остальные доступны в разделе «Мои привычки».',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF166534),
+                      ),
+                ),
+              ),
             ],
             const SizedBox(height: 16),
             TextButton.icon(
